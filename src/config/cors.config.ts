@@ -2,7 +2,7 @@ import {
   CORS_ALLOWED_HEADERS,
   CORS_EXPOSED_HEADERS,
   CORS_WHITELIST,
-} from '@common/environment';
+} from '../common/environment';
 import { CorsOptionsDelegate } from '@nestjs/common/interfaces/external/cors-options.interface';
 
 const whitelist: string[] = CORS_WHITELIST ? CORS_WHITELIST.split(',') : [];
