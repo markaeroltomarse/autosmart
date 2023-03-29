@@ -24,7 +24,5 @@
       "@config/*": ["src/config/*"],
       "@common/*": ["src/common/*"],
     }
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  }
 }
