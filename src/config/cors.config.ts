@@ -25,7 +25,7 @@ const origin = (
   return callback(new Error('Not allowed by CORS'));
 };
 
-export default {
+export const corsConfig = {
   origin,
   exposedHeaders,
   allowedHeaders,
