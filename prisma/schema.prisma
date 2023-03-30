@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model CustomerEntity {
+  id             String   @id @default(cuid()) @map("_id")
+  email          String
+  password       String
+  fname          String?  @default("")
+  lname          String?  @default("")
+  gender         String?  @default("")
+  address        String[]
+  defaultAddress String?  @default("")
+  profileImage   String?  @default("")
+  contactNumber  String?  @default("")
+
+  @@map("customers")
+}
+
+model AdminEntity {
+  id       String @id @default(cuid()) @map("_id")
+  email    String
+  password String
+  fname    String
+  lname    String
+
+  @@map("admins")
+}
+
+model ProductEntity {
+  id        String  @id @default(cuid()) @map("_id")
+  name      String
+  brandName String
+  category  String
+  price     Float
+  quantity  Int
+  status    String
+  discount  Int
+  imgURL    String? @default("")
+
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  @@map("products")
+}
+
+model CartEntity {
+  id         String @id @default(cuid()) @map("_id")
+  customerId String
+  products   Json[]
+
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @map("updated_at")
+
+  @@map("carts")
+}
+
+model TransactionEntity {
+  id           String    @id @default(cuid()) @map("_id")
+  status       String?   @default("pending")
+  serialNumber String
+  totalAmount  Float
+  customerId   String
+  products     Json[]
+  createdAt    DateTime? @default(now()) @map("created_at")
+
+  @@map("transactions")
+}
