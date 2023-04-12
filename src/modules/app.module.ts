@@ -9,6 +9,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { CustomerModule } from './customer/customer.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CustomerModule } from './customer/customer.module';
     PrismaModule,
     ProductModule,
     CartModule,
+    TransactionModule,
   ],
   controllers: [],
   providers: [JwtStrategy],

@@ -31,7 +31,7 @@ export class CustomerService {
       });
 
     if (!email || !customer) {
-      throw new NotFoundException('Invalid creadentials');
+      throw new NotFoundException('Invalid credentials');
     }
 
     // Create a token that will handle in Front End. for security
@@ -92,6 +92,27 @@ export class CustomerService {
   ) {
     delete updateCustomerInput['email'];
     delete updateCustomerInput['id'];
+
+    const { address, defaultAddress } = updateCustomerInput;
+
+    if ((address && !defaultAddress) || (!address && defaultAddress)) {
+      if (address) {
+        throw new BadRequestException('defaultAddress is required.');
+      } else {
+        throw new BadRequestException('address is required.');
+      }
+    }
+
+    if (
+      updateCustomerInput?.defaultAddress &&
+      !updateCustomerInput?.address.includes(
+        updateCustomerInput?.defaultAddress,
+      )
+    ) {
+      throw new BadRequestException(
+        'Default Address should included into address list.',
+      );
+    }
     return this.prismaService.customerEntity
       .update({
         where: {

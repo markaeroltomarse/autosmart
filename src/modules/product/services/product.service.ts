@@ -13,6 +13,9 @@ export class ProductService {
     return this.prismaService.productEntity
       .findMany({
         where: { category: filter?.category },
+        orderBy: {
+          createdAt: 'desc',
+        },
       })
       .catch((error) => {
         console.log(error);
@@ -50,6 +53,7 @@ export class ProductService {
     productId: string,
     updateProductInput: UpdateProductInput,
   ) {
+    delete updateProductInput['id'];
     return this.prismaService.productEntity
       .update({
         where: {

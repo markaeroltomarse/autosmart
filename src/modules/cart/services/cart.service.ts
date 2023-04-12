@@ -8,6 +8,7 @@ import { PrismaService } from './../../prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { ICartProduct } from '../dtos/interfaces/cart-product.interface';
 import { CheckOutInput } from '../dtos/inputs/checkout.input';
+import { CartEntity, CustomerEntity, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CartService {
@@ -187,15 +188,21 @@ export class CartService {
   }
 
   async checkOut(customerId: string, checkOutInput: CheckOutInput) {
+    interface CartWithCustomer extends CartEntity {
+      customer: CustomerEntity;
+    }
     if (checkOutInput.products.length === 0) {
       throw new BadRequestException('Products should not be empty array.');
     }
 
-    const cart = await this.prismaService.cartEntity.findFirst({
+    const cart: any = await this.prismaService.cartEntity.findFirst({
+      include: {
+        customer: true,
+      },
       where: {
         customerId: customerId,
       },
-    });
+    } as Prisma.CartEntityFindFirstArgs);
 
     if (!cart) {
       throw new NotFoundException('Cart not found, Please try again.');
@@ -204,6 +211,12 @@ export class CartService {
     if (cart.products.length === 0) {
       throw new NotFoundException(
         'Product not found in your cart, Please try again.',
+      );
+    }
+
+    if (cart.customer.defaultAddress === '') {
+      throw new NotFoundException(
+        'Please select an address for your order, Please try again.',
       );
     }
 
@@ -232,7 +245,11 @@ export class CartService {
         (item) => item.productId === product.id,
       );
 
-      if (!selectedItem) {
+      const cartItem: any = cart.products.find(
+        (item: any) => item.productId === selectedItem.productId,
+      );
+
+      if (!selectedItem || !cartItem) {
         throw new NotFoundException(
           `${product.name} is not added to your cart. Please try again.`,
         );
@@ -243,10 +260,6 @@ export class CartService {
           `${product.name} exceeded quantity, Please try again.`,
         );
       }
-
-      const cartItem: any = cart.products.find(
-        (item: any) => item.productId === selectedItem.productId,
-      );
 
       if (selectedItem.quantity > cartItem.quantity) {
         throw new BadRequestException(
@@ -302,7 +315,9 @@ export class CartService {
         (selected) => selected.productId === item.productId,
       );
 
-      item.quantity -= selectedItem.quantity;
+      if (selectedItem) {
+        item.quantity -= selectedItem.quantity;
+      }
     });
 
     return this.prismaService.cartEntity.update({

@@ -11,16 +11,17 @@ datasource db {
 }
 
 model CustomerEntity {
-  id             String   @id @default(cuid()) @map("_id")
+  id             String      @id @default(cuid()) @map("_id")
   email          String
   password       String
-  fname          String?  @default("")
-  lname          String?  @default("")
-  gender         String?  @default("")
+  fname          String?     @default("")
+  lname          String?     @default("")
+  gender         String?     @default("")
   address        String[]
-  defaultAddress String?  @default("")
-  profileImage   String?  @default("")
-  contactNumber  String?  @default("")
+  defaultAddress String?     @default("")
+  profileImage   String?     @default("")
+  contactNumber  String?     @default("")
+  cart           CartEntity?
 
   @@map("customers")
 }
@@ -31,20 +32,23 @@ model AdminEntity {
   password String
   fname    String
   lname    String
+  role     String @default("admin")
 
   @@map("admins")
 }
 
 model ProductEntity {
-  id        String  @id @default(cuid()) @map("_id")
-  name      String
-  brandName String
-  category  String
-  price     Float
-  quantity  Int
-  status    String
-  discount  Int
-  imgURL    String? @default("")
+  id             String  @id @default(cuid()) @map("_id")
+  name           String
+  brandName      String
+  category       String
+  price          Float
+  quantity       Int
+  status         String
+  discount       Int
+  imgURL         String? @default("")
+  color          String?
+  contactOptions String?
 
   createdAt DateTime? @default(now()) @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
@@ -53,19 +57,19 @@ model ProductEntity {
 }
 
 model CartEntity {
-  id         String @id @default(cuid()) @map("_id")
-  customerId String
+  id         String         @id @default(cuid()) @map("_id")
+  customerId String         @unique
   products   Json[]
-
-  createdAt DateTime? @default(now()) @map("created_at")
-  updatedAt DateTime? @default(now()) @map("updated_at")
+  customer   CustomerEntity @relation(fields: [customerId], references: [id])
+  createdAt  DateTime?      @default(now()) @map("created_at")
+  updatedAt  DateTime?      @default(now()) @map("updated_at")
 
   @@map("carts")
 }
 
 model TransactionEntity {
   id           String    @id @default(cuid()) @map("_id")
-  status       String?   @default("pending")
+  status       String?   @default("pending") // Pending | shi
   serialNumber String
   totalAmount  Float
   customerId   String

@@ -1,5 +1,11 @@
 import { GenderEnum } from './../../../../data/enums/gender.enum';
-import { IsNotEmpty, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+  IsArray,
+} from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 export class CreateCustomerInput {
   @IsNotEmpty()
@@ -25,7 +31,12 @@ export class CreateCustomerInput {
 
   @IsOptional()
   @IsNotEmpty()
-  address?: string;
+  @IsArray()
+  address?: string[];
+
+  @IsOptional()
+  @IsNotEmpty()
+  defaultAddress?: string;
 
   @IsOptional()
   @IsNotEmpty()
