@@ -272,10 +272,12 @@ export class CartService {
 
       // Update product quantity
       const quantityLeft = product.quantity - selectedItem.quantity;
+
       if (quantityLeft >= 0) {
         if (selectedItem.quantity === cartItem.quantity) {
           productsTobeRemoveInCart.push(product.id);
         }
+
         productToBeUpdate.push({
           ...selectedItem,
           finalQuantity: quantityLeft,
