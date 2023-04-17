@@ -176,7 +176,7 @@ export class CartService {
     for (let cartItem of cart.products) {
       const item = cartItem as unknown as ICartProduct;
       products.push({
-        quantity: item.quantity,
+        ...item,
         product: await this.productService.getProduct(item.productId),
       });
     }
@@ -296,6 +296,18 @@ export class CartService {
       });
     }
 
+    let toBeCheckOuts = [];
+    for (const toBeCheckOut of checkOutInput.products) {
+      const cartItem = cart.products.find(
+        (item) => item.productId === toBeCheckOut.productId,
+      );
+
+      toBeCheckOuts.push({
+        ...cartItem,
+        quantity: toBeCheckOut.quantity,
+      });
+    }
+
     // Save to transaction DB
     await this.prismaService.transactionEntity.create({
       data: {
@@ -303,7 +315,7 @@ export class CartService {
         serialNumber: `${Math.floor(Math.random() * 100000)}`,
         totalAmount,
         customerId,
-        products: [...(checkOutInput.products as any)],
+        products: [...(toBeCheckOuts as any)],
       },
     });
 

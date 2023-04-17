@@ -5,16 +5,18 @@ import { PrismaService } from './../../prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { UpdateTransactionInput } from '../dtos/inputs/update-transaction.input';
 import { ICartProduct } from '@modules/cart/dtos/interfaces/cart-product.interface';
+import { CustomerService } from '@modules/customer/services/customer.service';
 
 @Injectable()
 export class TransactionService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly productService: ProductService,
+    private readonly customerService: CustomerService,
   ) {}
 
   async getCustomerTransactions(customerId: string, filter?: any) {
-    const transactions = await this.prismaService.transactionEntity
+    const transactions: any = await this.prismaService.transactionEntity
       .findMany({
         where: {
           customerId: customerId,
@@ -36,6 +38,12 @@ export class TransactionService {
       const products = await this.getProducts(transaction.products as any);
       transactions[index].products = products;
 
+      const customer = await this.customerService.getCustomer(
+        transactions[index].customerId,
+      );
+      transactions[index].address = customer.defaultAddress;
+      transactions[index].contactNumber = customer.contactNumber;
+      transactions[index].fullname = customer.lname + ', ' + customer.fname;
       index++;
     }
 
@@ -43,7 +51,7 @@ export class TransactionService {
   }
 
   async getTransactions(filter?: any) {
-    let transactions = await this.prismaService.transactionEntity
+    let transactions: any = await this.prismaService.transactionEntity
       .findMany({
         where: {
           createdAt: filter?.date || undefined,
@@ -64,6 +72,12 @@ export class TransactionService {
       const products = await this.getProducts(transaction.products as any);
       transactions[index].products = products;
 
+      const customer = await this.customerService.getCustomer(
+        transactions[index].customerId,
+      );
+      transactions[index].address = customer.defaultAddress;
+      transactions[index].contactNumber = customer.contactNumber;
+      transactions[index].fullname = customer.lname + ', ' + customer.fname;
       index++;
     }
 
@@ -103,6 +117,7 @@ export class TransactionService {
     for (let cartItem of transactionProducts) {
       const item = cartItem as unknown as ICartProduct;
       products.push({
+        ...item,
         quantity: item.quantity,
         product: await this.productService.getProduct(item.productId),
       });
