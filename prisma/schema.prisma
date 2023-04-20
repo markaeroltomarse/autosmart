@@ -76,6 +76,7 @@ model TransactionEntity {
   totalAmount  Float
   customerId   String
   products     Json[]
+  rider        String?
   createdAt    DateTime? @default(now()) @map("created_at")
 
   @@map("transactions")

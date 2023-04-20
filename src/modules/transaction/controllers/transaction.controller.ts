@@ -15,7 +15,7 @@ import {
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
-  @Get()
+  @Get('/customer')
   @GenericResponse()
   @UseGuards(RestAuthGuard)
   async getCustomerTransactions(@CurrentUser('id') customerId: string) {
