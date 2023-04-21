@@ -312,7 +312,7 @@ export class CartService {
     await this.prismaService.transactionEntity.create({
       data: {
         status: 'pending',
-        serialNumber: `${Math.floor(Math.random() * 100000)}`,
+        serialNumber: checkOutInput.serialNumber,
         totalAmount,
         customerId,
         products: [...(toBeCheckOuts as any)],

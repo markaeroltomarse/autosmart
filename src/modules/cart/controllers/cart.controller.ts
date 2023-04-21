@@ -13,10 +13,15 @@ import {
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { AddToCartInput } from '../dtos/inputs/add-to-cart.input';
+import { PaymentService } from '../services/payment.service';
+import { PaymentInput } from '../dtos/inputs/payment.input';
 
 @Controller('carts')
 export class CartController {
-  constructor(private readonly cartService: CartService) {}
+  constructor(
+    private readonly cartService: CartService,
+    private readonly paymentService: PaymentService,
+  ) {}
 
   @Get()
   @UseGuards(RestAuthGuard)
@@ -89,5 +94,18 @@ export class CartController {
     return {
       data: result,
     };
+  }
+
+  @Post('/payment')
+  async chargeGcashEWallet(
+    @Body() { amount, externalId, phoneNumber }: PaymentInput,
+  ) {
+    console.log({ externalId, amount, phoneNumber });
+    const data = await this.paymentService.chargeEWallet(
+      externalId,
+      amount,
+      phoneNumber,
+    );
+    return data;
   }
 }

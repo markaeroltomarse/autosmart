@@ -14,6 +14,10 @@ export class CheckOutInput {
   @ValidateNested({ each: true })
   @Type(() => CartProduct)
   products: ICartProduct[];
+
+  @IsNotEmpty()
+  @IsString()
+  serialNumber: string;
 }
 
 export class CartProduct {
