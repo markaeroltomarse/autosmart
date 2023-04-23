@@ -109,7 +109,7 @@ export class CartController {
     return data;
   }
 
-  @Get('/payment/callback')
+  @Post('/payment/callback')
   async paymentCallback(@Body() paymentResult: any) {
     return paymentResult;
   }
