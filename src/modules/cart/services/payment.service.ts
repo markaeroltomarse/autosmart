@@ -6,7 +6,8 @@ export class PaymentService {
   async chargeEWallet(externalId: string, amount: number, phoneNumber: string) {
     try {
       const XENDIT_API_KEY =
-        'xnd_development_WyL74KsUF8XmmWDt6Q3NCERvoZxdAkfYA6GGA3U8vmlEunxofJexHQ7VzfkeK45E';
+        'xnd_development_vZmXlXWOgFVZ5M37j08CnrNxQNGZgDtctIfIrL2SKlKbHEev2kAAO0QDEK7qx';
+      // 'xnd_development_WyL74KsUF8XmmWDt6Q3NCERvoZxdAkfYA6GGA3U8vmlEunxofJexHQ7VzfkeK45E';
       // Create a payment request
       const createPaymentRequest = {
         reference_id: externalId,
