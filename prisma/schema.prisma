@@ -50,6 +50,7 @@ model ProductEntity {
   color          String?
   contactOptions String?
   images         String[]
+  productType    String   @default("headlights")
 
   createdAt DateTime? @default(now()) @map("created_at")
   updatedAt DateTime? @default(now()) @map("updated_at")
@@ -80,4 +81,15 @@ model TransactionEntity {
   createdAt    DateTime? @default(now()) @map("created_at")
 
   @@map("transactions")
+}
+
+model CategoryEntity {
+  id          String @id @default(cuid()) @map("_id")
+  productType String
+  name        String
+}
+
+model ProductTypeEntity {
+  id   String @id @default(cuid()) @map("_id")
+  name String
 }

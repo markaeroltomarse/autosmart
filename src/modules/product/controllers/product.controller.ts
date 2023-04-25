@@ -14,6 +14,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
+import { CreateCategoryInput } from '../dto/inputs/category/category.input';
 
 @Controller('products')
 export class ProductController {
@@ -73,6 +74,33 @@ export class ProductController {
   async deleteProduct(@Param('productId') productId: string) {
     const result = await this.productService.deleteProduct(productId);
 
+    return {
+      data: result,
+    };
+  }
+
+  @Post('/category')
+  @GenericResponse()
+  async createCategory(@Body() categoryInput: CreateCategoryInput) {
+    const result = await this.productService.createCategory(categoryInput);
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/category/:productType')
+  @GenericResponse()
+  async getCategories(@Param('productType') productType: string) {
+    const result = await this.productService.getCategories(productType);
+    return {
+      data: result,
+    };
+  }
+
+  @Delete('/category/:categoryId')
+  @GenericResponse()
+  async deleteCategories(@Param('categoryId') categoryId: string) {
+    const result = await this.productService.deleteCategory(categoryId);
     return {
       data: result,
     };

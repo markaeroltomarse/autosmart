@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductInput } from '../dto/inputs/product.input';
 import { ProductEntity } from '@prisma/client';
 import { UpdateProductInput } from '../dto/inputs/update-product.input';
+import { CreateCategoryInput } from '../dto/inputs/category/category.input';
 
 @Injectable()
 export class ProductService {
@@ -37,9 +38,25 @@ export class ProductService {
   }
 
   async createProduct(productInput: ProductInput) {
+    const category = await this.prismaService.categoryEntity
+      .findFirst({
+        where: { name: productInput.category },
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new BadRequestException('Cannot get category. Please try again.');
+      });
+
+    if (!category) {
+      throw new BadRequestException('Cannot get category. Please try again.');
+    }
+
     return this.prismaService.productEntity
       .create({
-        data: productInput,
+        data: {
+          ...productInput,
+          productType: category.productType,
+        },
       })
       .catch((error) => {
         console.log(error);
@@ -78,6 +95,49 @@ export class ProductService {
         console.log(error);
         throw new BadRequestException(
           'Cannot delete products. Please try again.',
+        );
+      });
+  }
+
+  async createCategory(categoryInput: CreateCategoryInput) {
+    return this.prismaService.categoryEntity
+      .create({
+        data: categoryInput,
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new BadRequestException(
+          'Cannot create categories. Please try again.',
+        );
+      });
+  }
+
+  async getCategories(productType: string) {
+    return this.prismaService.categoryEntity
+      .findMany(
+        productType === 'all'
+          ? undefined
+          : {
+              where: { productType },
+            },
+      )
+      .catch((error) => {
+        console.log(error);
+        throw new BadRequestException(
+          'Cannot get categories. Please try again.',
+        );
+      });
+  }
+
+  async deleteCategory(id: string) {
+    return this.prismaService.categoryEntity
+      .delete({
+        where: { id },
+      })
+      .catch((error) => {
+        console.log(error);
+        throw new BadRequestException(
+          'Cannot delete category. Please try again.',
         );
       });
   }
