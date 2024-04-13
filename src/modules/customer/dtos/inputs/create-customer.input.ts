@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsEnum,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 export class CreateCustomerInput {
@@ -41,6 +42,11 @@ export class CreateCustomerInput {
   @IsOptional()
   @IsNotEmpty()
   profileImage?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  isRider?: boolean;
 }
 
 export class UpdateCustomerInput extends PartialType(

@@ -1,5 +1,11 @@
 import { OrderStatusEnum } from '@enums/order-status.enum';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class UpdateTransactionInput {
   @IsOptional()
@@ -8,7 +14,6 @@ export class UpdateTransactionInput {
   status?: OrderStatusEnum;
 
   @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  rider?: string;
+  @IsEmail()
+  email?: string;
 }

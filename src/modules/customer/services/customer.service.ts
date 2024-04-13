@@ -10,6 +10,9 @@ import {
   UpdateCustomerInput,
 } from '../dtos/inputs/create-customer.input';
 import { JWT_SECRET } from '@common/environment';
+import { count } from 'console';
+import { excluder } from '@common/utils/object';
+import { CustomerEntity } from '@prisma/client';
 
 @Injectable()
 export class CustomerService {
@@ -18,12 +21,15 @@ export class CustomerService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async loginCustomer(email: string) {
+  async loginCustomer(email: string, password?: string) {
+    const where: any = { email };
+    if (password) {
+      where.password = password;
+    }
+
     const customer = await this.prismaService.customerEntity
       .findFirst({
-        where: {
-          email: email,
-        },
+        where,
       })
       .catch((error) => {
         console.log(error);
@@ -63,7 +69,7 @@ export class CustomerService {
       .create({
         data: {
           ...createCustomerInput,
-          password: 'autosmart2023',
+          password: createCustomerInput?.password || 'autosmart2023',
         },
       })
       .catch((error) => {
@@ -90,9 +96,6 @@ export class CustomerService {
     customerId: string,
     updateCustomerInput: UpdateCustomerInput,
   ) {
-    delete updateCustomerInput['email'];
-    delete updateCustomerInput['id'];
-
     const { address, defaultAddress } = updateCustomerInput;
 
     if ((address && !defaultAddress) || (!address && defaultAddress)) {
@@ -113,11 +116,24 @@ export class CustomerService {
         'Default Address should included into address list.',
       );
     }
+
+    let where: any = {};
+    if (updateCustomerInput?.['email']) {
+      const user = await this.prismaService.customerEntity.findFirst({
+        where: { email: updateCustomerInput['email'] },
+        select: { id: true },
+      });
+      where.id = user.id;
+    } else {
+      where.id = customerId;
+    }
+
+    delete updateCustomerInput['email'];
+    delete updateCustomerInput['id'];
+
     return this.prismaService.customerEntity
       .update({
-        where: {
-          id: customerId,
-        },
+        where,
         data: updateCustomerInput,
       })
       .catch((error) => {
@@ -139,5 +155,28 @@ export class CustomerService {
         console.log(error);
         throw new BadRequestException('Cannot get profile, Please try again.');
       });
+  }
+
+  async getRiders(): Promise<CustomerEntity[]> {
+    const riders = await this.prismaService.customerEntity.findMany({
+      where: {
+        isRider: true,
+      },
+    });
+
+    const outputRiders: any[] = [];
+    for (let rider of riders) {
+      const count = await this.prismaService.transactionEntity.count({
+        where: {
+          riderId: rider.id,
+        },
+      });
+
+      outputRiders.push(
+        excluder({ ...rider, deliveries: count }, ['password']),
+      );
+    }
+
+    return outputRiders;
   }
 }

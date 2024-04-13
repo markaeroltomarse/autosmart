@@ -11,17 +11,20 @@ datasource db {
 }
 
 model CustomerEntity {
-  id             String      @id @default(cuid()) @map("_id")
-  email          String
-  password       String
-  fname          String?     @default("")
-  lname          String?     @default("")
-  gender         String?     @default("")
-  address        String[]
-  defaultAddress String?     @default("")
-  profileImage   String?     @default("")
-  contactNumber  String?     @default("")
-  cart           CartEntity?
+  id                String              @id @default(cuid()) @map("_id")
+  email             String
+  password          String
+  fname             String?             @default("")
+  lname             String?             @default("")
+  gender            String?             @default("")
+  address           String[]
+  defaultAddress    String?             @default("")
+  profileImage      String?             @default("")
+  contactNumber     String?             @default("")
+  cart              CartEntity?
+  TransactionEntity TransactionEntity[]
+
+  isRider Boolean @default(false)
 
   @@map("customers")
 }
@@ -71,14 +74,15 @@ model CartEntity {
 }
 
 model TransactionEntity {
-  id           String    @id @default(cuid()) @map("_id")
-  status       String?   @default("pending") // Pending | shi
+  id           String         @id @default(cuid()) @map("_id")
+  status       String?        @default("pending") // Pending | shi
   serialNumber String
   totalAmount  Float
   customerId   String
   products     Json[]
-  rider        String?
-  createdAt    DateTime? @default(now()) @map("created_at")
+  riderId      String?        @default("")
+  customer     CustomerEntity @relation(fields: [customerId], references: [id])
+  createdAt    DateTime?      @default(now()) @map("created_at")
 
   @@map("transactions")
 }

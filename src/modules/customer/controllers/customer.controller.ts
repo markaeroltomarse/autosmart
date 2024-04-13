@@ -15,8 +15,11 @@ export class CustomerController {
 
   @Post('/login')
   @GenericResponse()
-  async loginCustomer(@Body('email') email: string) {
-    const result = await this.customerService.loginCustomer(email);
+  async loginCustomer(
+    @Body('email') email: string,
+    @Body('password') password?: string,
+  ) {
+    const result = await this.customerService.loginCustomer(email, password);
 
     return {
       data: {
@@ -63,6 +66,16 @@ export class CustomerController {
 
     return {
       data: CustomerMapper.displayOne(result),
+    };
+  }
+
+  @Get('/riders')
+  @GenericResponse()
+  async getRiders() {
+    const result = await this.customerService.getRiders();
+
+    return {
+      data: result,
     };
   }
 }

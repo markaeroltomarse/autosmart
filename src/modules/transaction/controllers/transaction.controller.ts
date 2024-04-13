@@ -9,7 +9,9 @@ import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import {
   Body,
   Param,
+  Query,
 } from '@nestjs/common/decorators/http/route-params.decorator';
+import { OrderStatusEnum } from '@enums/order-status.enum';
 
 @Controller('transactions')
 export class TransactionController {
@@ -31,8 +33,8 @@ export class TransactionController {
   @Get()
   @GenericResponse()
   @UseGuards(RestAuthGuard)
-  async getTransactions() {
-    const result = await this.transactionService.getTransactions();
+  async getTransactions(@Query() filter: any) {
+    const result = await this.transactionService.getTransactions(filter);
 
     return {
       data: TransactionMapper.seperateByStatus(result),

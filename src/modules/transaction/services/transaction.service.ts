@@ -55,6 +55,10 @@ export class TransactionService {
       .findMany({
         where: {
           createdAt: filter?.date || undefined,
+          ...(filter || {}),
+        },
+        include: {
+          customer: true,
         },
         orderBy: {
           createdAt: 'desc',
@@ -104,11 +108,31 @@ export class TransactionService {
       );
     }
 
+    let settingDelivery: any = {};
+    if (updateTransactionInput?.email) {
+      const deliverBy = await this.prismaService.customerEntity.findFirst({
+        where: {
+          email: updateTransactionInput?.email,
+        },
+      });
+
+      if (!deliverBy) {
+        throw new BadRequestException('Delivery Staff not found.');
+      }
+
+      settingDelivery.riderId = deliverBy.id;
+    }
+
+    delete updateTransactionInput['email'];
+
     return this.prismaService.transactionEntity.update({
       where: {
         id: transaction.id,
       },
-      data: updateTransactionInput,
+      data: {
+        ...updateTransactionInput,
+        ...settingDelivery,
+      },
     });
   }
 
