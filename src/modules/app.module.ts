@@ -10,10 +10,20 @@ import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
 import { CustomerModule } from './customer/customer.module';
 import { TransactionModule } from './transaction/transaction.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
+import path, { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      parser: I18nJsonParser,
+      parserOptions: {
+        path: join(__dirname, '..', '/lang/'),
+      },
+    }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: () => ({
@@ -29,6 +39,7 @@ import { TransactionModule } from './transaction/transaction.module';
     ProductModule,
     CartModule,
     TransactionModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [JwtStrategy],

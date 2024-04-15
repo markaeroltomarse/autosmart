@@ -25,6 +25,7 @@
     "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.11.2",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
@@ -38,7 +39,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "dotenv": "^16.0.3",
-    "nestjs-i18n": "^10.2.6",
+    "handlebars": "^4.7.8",
+    "nestjs-i18n": "^8.3.2",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^4.12.0",

@@ -6,8 +6,19 @@ import { CustomerMapper } from './../dtos/mappers/customer.mapper';
 import { CurrentUser } from './../../../common/decorators/current-user.decorator';
 import { RestAuthGuard } from './../../../common/auth/guards/rest-auth.guard';
 import { CustomerService } from './../services/customer.service';
-import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
+import { Response } from 'express';
+import { FE_URL } from '@common/environment';
 
 @Controller('customers')
 export class CustomerController {
@@ -77,5 +88,18 @@ export class CustomerController {
     return {
       data: result,
     };
+  }
+
+  @Get('verify')
+  async verifyAccount(@Query() { email }: any, @Res() res: Response) {
+    const user = await this.customerService.updateCustomer(email, {
+      email,
+      isVerified: true,
+    });
+
+    const token = await this.customerService.generateToken(user);
+    return res.redirect(
+      `${FE_URL}/account/authentication?approved=true&token=${token}`,
+    );
   }
 }

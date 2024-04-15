@@ -47,8 +47,23 @@ export class CreateCustomerInput {
   @IsNotEmpty()
   @IsBoolean()
   isRider?: boolean;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  isVerified?: boolean;
 }
+
+// export class UpdateCustomerInput extends PartialType(
+//   OmitType(CreateCustomerInput, ['email'] as const),
+// ) {
+
+// }
 
 export class UpdateCustomerInput extends PartialType(
   OmitType(CreateCustomerInput, ['email'] as const),
-) {}
+) {
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+}

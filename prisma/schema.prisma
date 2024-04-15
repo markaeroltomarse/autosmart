@@ -24,7 +24,8 @@ model CustomerEntity {
   cart              CartEntity?
   TransactionEntity TransactionEntity[]
 
-  isRider Boolean @default(false)
+  isRider    Boolean @default(false)
+  isVerified Boolean @default(false)
 
   @@map("customers")
 }

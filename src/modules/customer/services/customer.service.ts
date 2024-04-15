@@ -9,16 +9,18 @@ import {
   CreateCustomerInput,
   UpdateCustomerInput,
 } from '../dtos/inputs/create-customer.input';
-import { JWT_SECRET } from '@common/environment';
+import { BASE_URL, JWT_SECRET } from '@common/environment';
 import { count } from 'console';
 import { excluder } from '@common/utils/object';
 import { CustomerEntity } from '@prisma/client';
+import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
 
 @Injectable()
 export class CustomerService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly notificationService: EmailNotificationService,
   ) {}
 
   async loginCustomer(email: string, password?: string) {
@@ -88,6 +90,25 @@ export class CustomerService {
         console.log(error);
         throw new BadRequestException('Cannot add to cart, Please try again.');
       });
+
+    if (createCustomerInput?.password) {
+      // Send Verification Email
+      await this.notificationService.sendEmail(
+        {
+          emailRecipient: savedCustomer.email,
+          emailTemplate: 'verify.template.html',
+          emailSubject: `Verify Email Account ${
+            savedCustomer.email.split('@')[0]
+          }`,
+        },
+        {
+          verifyLink: `${BASE_URL}/api/customers/verify?email=${encodeURIComponent(
+            savedCustomer.email,
+          )}`,
+          email: savedCustomer.email,
+        },
+      );
+    }
 
     return savedCustomer;
   }
@@ -178,5 +199,19 @@ export class CustomerService {
     }
 
     return outputRiders;
+  }
+
+  async generateToken(user) {
+    const token = this.jwtService.sign(
+      {
+        id: user.id,
+        role: user.role,
+      },
+      {
+        secret: JWT_SECRET,
+      },
+    );
+
+    return token;
   }
 }

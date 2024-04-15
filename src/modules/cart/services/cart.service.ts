@@ -2,6 +2,7 @@ import { ProductService } from './../../product/services/product.service';
 import { AddToCartInput } from './../dtos/inputs/add-to-cart.input';
 import {
   BadRequestException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common/exceptions';
 import { PrismaService } from './../../prisma/services/prisma.service';
@@ -203,6 +204,10 @@ export class CartService {
         customerId: customerId,
       },
     } as Prisma.CartEntityFindFirstArgs);
+
+    if (!cart.customer?.isVerified) {
+      throw new ForbiddenException('Account not verified.');
+    }
 
     if (!cart) {
       throw new NotFoundException('Cart not found, Please try again.');
