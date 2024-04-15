@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.11.0" 
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "npm run prisma:generate && npx prisma db push && nest build",
