@@ -16,7 +16,8 @@ export const CORS_WHITELIST = process.env.CORS_WHITELIST || '';
 
 export const JWT_SECRET = process.env.JWT_SECRET || '';
 
-export const EMAIL_NOTIFICATION_FROM = process.env.MAILER_USER || '';
+export const EMAIL_NOTIFICATION_FROM =
+  process.env.EMAIL_NOTIFICATION_FROM || '';
 export const MAILER_HOST = process.env.MAILER_HOST || '';
 export const MAILER_PORT = process.env.MAILER_PORT || '';
 export const MAILER_USER = process.env.MAILER_USER || '';

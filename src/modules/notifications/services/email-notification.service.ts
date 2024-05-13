@@ -40,9 +40,6 @@ export class EmailNotificationService {
         html: htmlToSend,
         attachments: attachments,
       })
-      .then(() => {
-        return;
-      })
       .catch(async (error) => {
         console.log(error);
         throw new UnprocessableEntityException(
