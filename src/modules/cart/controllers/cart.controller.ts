@@ -97,14 +97,16 @@ export class CartController {
   }
 
   @Post('/payment')
+  @UseGuards(RestAuthGuard)
   async chargeGcashEWallet(
     @Body() { amount, externalId, phoneNumber }: PaymentInput,
+    @CurrentUser('id') customerId: string,
   ) {
-    console.log({ externalId, amount, phoneNumber });
     const data = await this.paymentService.chargeEWallet(
       externalId,
       amount,
       phoneNumber,
+      customerId,
     );
     return data;
   }

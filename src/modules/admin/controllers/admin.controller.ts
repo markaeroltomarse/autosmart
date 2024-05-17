@@ -7,10 +7,14 @@ import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { Body } from '@nestjs/common/decorators';
 import { CreateAdminInput } from '../dto/input/create-admin.input';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
+import { PredictiveAnalyticsService } from '../services/predictive-analytics.service';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly predictiveAnalyticsService: PredictiveAnalyticsService,
+  ) {}
 
   @Get()
   @UseGuards(RestAuthGuard)
@@ -44,6 +48,23 @@ export class AdminController {
         ...result,
         admin: AdminMapper.displayOne(result.admin),
       },
+    };
+  }
+
+  @Get('/sales-prediction')
+  @GenericResponse()
+  async dashboard() {
+    const result = await this.predictiveAnalyticsService.getSalesPrediction();
+    return {
+      data: result,
+    };
+  }
+
+  @Get('/inventory-prediction')
+  @GenericResponse()
+  async getInventoryPrediction() {
+    return {
+      data: await this.predictiveAnalyticsService.getInventoryPrediction(),
     };
   }
 }

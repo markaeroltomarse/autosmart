@@ -205,10 +205,6 @@ export class CartService {
       },
     } as Prisma.CartEntityFindFirstArgs);
 
-    if (!cart.customer?.isVerified) {
-      throw new ForbiddenException('Account not verified.');
-    }
-
     if (!cart) {
       throw new NotFoundException('Cart not found, Please try again.');
     }

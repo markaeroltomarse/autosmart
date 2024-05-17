@@ -79,6 +79,15 @@ export class TransactionService {
       const customer = await this.customerService.getCustomer(
         transactions[index].customerId,
       );
+
+      if (transaction?.riderId) {
+        const rider = await this.customerService.getCustomer(
+          transaction.riderId,
+          true,
+        );
+
+        transactions[index].rider = rider;
+      }
       transactions[index].address = customer.defaultAddress;
       transactions[index].contactNumber = customer.contactNumber;
       transactions[index].fullname = customer.lname + ', ' + customer.fname;
