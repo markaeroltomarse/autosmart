@@ -24,6 +24,7 @@ export class CustomerService {
   ) {}
 
   async loginCustomer(email: string, password?: string) {
+    // If login is by Email and Password
     const where: any = { email };
     if (password) {
       where.password = password;
@@ -53,18 +54,20 @@ export class CustomerService {
     const generateOTP = Math.floor(100000 + Math.random() * 900000);
     console.log('generateOTP', generateOTP);
 
-    // Send Verification Email
-    await this.notificationService.sendEmail(
-      {
-        emailRecipient: customer.email,
-        emailTemplate: 'otp-login.template.html',
-        emailSubject: `OTP Verification ${customer.email.split('@')[0]}`,
-      },
-      {
-        email: customer.email.split('@')[0],
-        otp: generateOTP,
-      },
-    );
+    if (password) {
+      // Send Verification Email
+      await this.notificationService.sendEmail(
+        {
+          emailRecipient: customer.email,
+          emailTemplate: 'otp-login.template.html',
+          emailSubject: `OTP Verification ${customer.email.split('@')[0]}`,
+        },
+        {
+          email: customer.email.split('@')[0],
+          otp: generateOTP,
+        },
+      );
+    }
 
     return {
       customer,

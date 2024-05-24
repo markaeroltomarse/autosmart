@@ -189,9 +189,6 @@ export class CartService {
   }
 
   async checkOut(customerId: string, checkOutInput: CheckOutInput) {
-    interface CartWithCustomer extends CartEntity {
-      customer: CustomerEntity;
-    }
     if (checkOutInput.products.length === 0) {
       throw new BadRequestException('Products should not be empty array.');
     }

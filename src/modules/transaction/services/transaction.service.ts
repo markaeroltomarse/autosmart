@@ -107,10 +107,12 @@ export class TransactionService {
       },
     });
 
+    // Check if the transaction exists and its status
     if (
       !transaction ||
-      transaction.status === OrderStatusEnum.COMPLETED ||
-      transaction.status === OrderStatusEnum.CANCELLED
+      [OrderStatusEnum.COMPLETED, OrderStatusEnum.CANCELLED].includes(
+        transaction.status as any,
+      )
     ) {
       throw new BadRequestException(
         'Cannot update order status, please try again.',

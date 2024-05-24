@@ -1,6 +1,7 @@
+import { ITransactionProductsJson } from '../../../data/types/transaction.types';
 import { PrismaService } from '@modules/prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { ProductEntity } from '@prisma/client';
+import { TransactionEntity } from '@prisma/client';
 import * as ss from 'simple-statistics';
 
 @Injectable()
@@ -38,29 +39,37 @@ export class PredictiveAnalyticsService {
     return { prediction, regressionData, slope, intercept };
   }
 
-  async getInventoryPrediction(): Promise<number[]> {
-    // Logic to fetch historical inventory data from Prisma
-    const historicalInventory: Partial<ProductEntity>[] =
-      await this.prisma.productEntity.findMany({
-        select: {
-          quantity: true,
-        },
+  async getInventoryPrediction() {
+    // Fetch historical transaction data
+    const transactions: TransactionEntity[] =
+      await this.prisma.transactionEntity.findMany();
+
+    // Aggregate sales data by date
+    const salesByDate: { [date: string]: number } = {};
+    transactions.forEach((transaction) => {
+      const date = transaction.createdAt.toISOString().split('T')[0];
+      transaction.products.forEach((product) => {
+        const transactionProduct =
+          product as unknown as ITransactionProductsJson;
+        if (!salesByDate[date]) {
+          salesByDate[date] = 0;
+        }
+        salesByDate[date] += transactionProduct.quantity;
       });
+    });
 
-    // Example: Calculate average inventory quantity for each product
-    const inventoryQuantities = historicalInventory.map(
-      (product) => product.quantity,
-    );
-    const averageInventory =
-      inventoryQuantities.reduce((acc, val) => acc + val, 0) /
-      inventoryQuantities.length;
+    // Generate future inventory predictions (simple linear regression for example)
+    const dates = Object.keys(salesByDate);
+    const quantities = Object.values(salesByDate);
 
-    // Example: Generate prediction (dummy data)
-    const prediction = Array.from(
-      { length: 30 },
-      (_, i) => averageInventory + i,
-    );
+    // Dummy prediction: Next 30 days with some simple logic (replace with actual predictive model)
+    const futurePredictions = Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(Date.now() + i * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
+      quantity: quantities.reduce((a, b) => a + b, 0) / quantities.length, // Average sales as prediction
+    }));
 
-    return prediction;
+    return futurePredictions;
   }
 }
