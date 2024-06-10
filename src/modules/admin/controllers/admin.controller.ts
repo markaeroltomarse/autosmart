@@ -8,6 +8,7 @@ import { Body } from '@nestjs/common/decorators';
 import { CreateAdminInput } from '../dto/input/create-admin.input';
 import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { PredictiveAnalyticsService } from '../services/predictive-analytics.service';
+import { ISummaryOutputDto } from '../dto/output/dashboard';
 
 @Controller('admin')
 export class AdminController {
@@ -66,5 +67,10 @@ export class AdminController {
     return {
       data: await this.predictiveAnalyticsService.getInventoryPrediction(),
     };
+  }
+
+  @Get('/summary')
+  async getSummary(): Promise<ISummaryOutputDto> {
+    return this.predictiveAnalyticsService.getSummary();
   }
 }

@@ -3,6 +3,7 @@ import { PrismaService } from '@modules/prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { TransactionEntity } from '@prisma/client';
 import * as ss from 'simple-statistics';
+import { ISummaryOutputDto } from '../dto/output/dashboard';
 
 @Injectable()
 export class PredictiveAnalyticsService {
@@ -59,7 +60,6 @@ export class PredictiveAnalyticsService {
     });
 
     // Generate future inventory predictions (simple linear regression for example)
-    const dates = Object.keys(salesByDate);
     const quantities = Object.values(salesByDate);
 
     // Dummy prediction: Next 30 days with some simple logic (replace with actual predictive model)
@@ -71,5 +71,33 @@ export class PredictiveAnalyticsService {
     }));
 
     return futurePredictions;
+  }
+
+  async getSummary(): Promise<ISummaryOutputDto> {
+    const totalCustomers = await this.prisma.customerEntity.count();
+    const totalRiders = await this.prisma.customerEntity.count({
+      where: { isRider: true },
+    });
+    const totalProducts = await this.prisma.productEntity.count();
+    const totalTransactions = await this.prisma.transactionEntity.count();
+    const totalRevenue = await this.prisma.transactionEntity.aggregate({
+      _sum: {
+        totalAmount: true,
+      },
+    });
+    const pendingTransactions = await this.prisma.transactionEntity.count({
+      where: {
+        status: 'pending',
+      },
+    });
+
+    return {
+      totalCustomers,
+      totalProducts,
+      totalTransactions,
+      totalRevenue: totalRevenue._sum.totalAmount || 0,
+      pendingTransactions,
+      totalRiders,
+    };
   }
 }
