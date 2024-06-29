@@ -10,6 +10,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Put,
   Query,
@@ -101,5 +102,12 @@ export class CustomerController {
     return res.redirect(
       `${FE_URL}/account/authentication?approved=true&token=${token}`,
     );
+  }
+
+  @Patch('verify')
+  @GenericResponse()
+  @UseGuards(RestAuthGuard)
+  async resendVerifyAccountEmail(@CurrentUser('id') customerId: string) {
+    return this.customerService.resendVerifyAccountEmail(customerId);
   }
 }

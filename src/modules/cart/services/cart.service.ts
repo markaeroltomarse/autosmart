@@ -7,9 +7,10 @@ import {
 } from '@nestjs/common/exceptions';
 import { PrismaService } from './../../prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
-import { ICartProduct } from '../dtos/interfaces/cart-product.interface';
+import { ICheckoutCartProduct } from '../dtos/interfaces/cart-product.interface';
 import { CheckOutInput } from '../dtos/inputs/checkout.input';
-import { CartEntity, CustomerEntity, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { ICartItemJson } from 'src/data/types/cart.types';
 
 @Injectable()
 export class CartService {
@@ -37,12 +38,18 @@ export class CartService {
 
     if (cart) {
       // If user is already have cart record
-      const cartProducts = cart.products as unknown as ICartProduct[];
+      const cartProducts = cart.products as unknown as ICartItemJson[];
 
       // Check if incoming item is already in the cart
-      if (
-        cartProducts.some((item) => item.productId === addToCartInput.productId)
-      ) {
+      const isExist = cartProducts.some(
+        (item) =>
+          item.productId === product.id &&
+          // Check the product property
+          item.application === addToCartInput.application &&
+          item.color === addToCartInput.color,
+      );
+
+      if (isExist) {
         return this.getCart(customerId);
       } else {
         // Add the product into cart
@@ -56,6 +63,9 @@ export class CartService {
                 push: [
                   {
                     ...addToCartInput,
+                    id: Math.random()
+                      .toString(16)
+                      .slice(2, 2 + 16),
                   },
                 ],
               },
@@ -88,6 +98,42 @@ export class CartService {
     return this.getCart(customerId);
   }
 
+  async removeCartItems(
+    customerId: string,
+    cartId: string,
+    productCartRecordIds: string[],
+  ): Promise<any | null> {
+    // Fetch the cart by id and customerId
+    const cart = await this.prismaService.cartEntity.findFirst({
+      where: {
+        id: cartId,
+        customerId: customerId,
+      },
+    });
+
+    // Check if cart exists
+    if (!cart) {
+      return null;
+    }
+
+    // Filter out products that should be removed
+    const updatedProducts = cart.products.filter(
+      (product: any) => !productCartRecordIds.includes(product.id),
+    );
+
+    // Update the cart with the filtered products
+    return this.prismaService.cartEntity.update({
+      where: {
+        id: cartId,
+      },
+      data: {
+        products: {
+          set: updatedProducts,
+        },
+      },
+    });
+  }
+
   async updateQuantity(customerId: string, cartItemInput: AddToCartInput) {
     const cart = await this.prismaService.cartEntity
       .findFirst({
@@ -100,11 +146,7 @@ export class CartService {
         throw new BadRequestException('Cannot get cart, Please try again.');
       });
 
-    if (
-      !cart.products.some(
-        (item: any) => item.productId === cartItemInput.productId,
-      )
-    ) {
+    if (!cart.products.some((item: any) => item.id === cartItemInput.id)) {
       throw new NotFoundException(
         'Product not found in your cart, Please try again.',
       );
@@ -114,18 +156,18 @@ export class CartService {
       cartItemInput.productId,
     );
     if (cartItemInput.quantity > product.quantity) {
-      throw new BadRequestException('Not enought quantity, Please try again.');
+      throw new BadRequestException('Not enough quantity, Please try again.');
     }
 
     // Update cart item quantity
-    let cartProducts = cart.products as unknown as ICartProduct[];
+    let cartProducts = cart.products as unknown as ICartItemJson[];
     if (cartItemInput.quantity <= 0) {
       cartProducts = cartProducts.filter(
-        (item) => item.productId !== cartItemInput.productId,
+        (item) => item.id !== cartItemInput.id,
       );
     } else {
       cartProducts.forEach((item) => {
-        if (item.productId === cartItemInput.productId) {
+        if (item.id === cartItemInput.id) {
           item.quantity = cartItemInput.quantity;
         }
       });
@@ -173,9 +215,10 @@ export class CartService {
         console.log(error);
         throw new BadRequestException('Cannot get cart, Please try again.');
       });
+
     const products = [];
     for (let cartItem of cart.products) {
-      const item = cartItem as unknown as ICartProduct;
+      const item = cartItem as unknown as ICartItemJson;
       products.push({
         ...item,
         product: await this.productService.getProduct(item.productId),
@@ -218,17 +261,31 @@ export class CartService {
       );
     }
 
+    const productRecordIds: string[] = checkOutInput.products.map(
+      (item) => item.id,
+    );
+
     const productIds: string[] = checkOutInput.products.map(
       (item) => item.productId,
     );
 
-    const products = await this.prismaService.productEntity.findMany({
-      where: {
-        id: {
-          in: productIds,
-        },
-      },
-    });
+    const products = await Promise.all(
+      productIds.map((productId: string) =>
+        this.prismaService.productEntity.findUnique({
+          where: {
+            id: productId,
+          },
+        }),
+      ),
+    );
+
+    // const products = await this.prismaService.productEntity.findMany({
+    //   where: {
+    //     id: {
+    //       in: productRecordIds,
+    //     },
+    //   },
+    // });
 
     if (checkOutInput.products.length === 0 || products.length === 0) {
       throw new BadRequestException('Products should not be empty array.');
@@ -238,51 +295,61 @@ export class CartService {
     let totalAmount: number = 0;
     let productsTobeRemoveInCart = [];
     let productToBeUpdate = [];
-    for (const product of products) {
-      const selectedItem = checkOutInput.products.find(
-        (item) => item.productId === product.id,
+
+    let productQuantityTracker = Object.values(
+      products.reduce((acc, product) => {
+        if (!acc[product.id]) {
+          acc[product.id] = { productId: product.id, quantity: 0 };
+        }
+        acc[product.id].quantity += product.quantity;
+        return acc;
+      }, {} as { [key: number]: { productId: string; quantity: number } }),
+    );
+
+    for (const actualProduct of products) {
+      const cartItem: ICartItemJson = cart.products.find(
+        (item: any) => item.productId === actualProduct.id,
       );
 
-      const cartItem: any = cart.products.find(
-        (item: any) => item.productId === selectedItem.productId,
-      );
+      // if (selectedItem.quantity > actualProduct.quantity) {
+      //   throw new BadRequestException(
+      //     `${actualProduct.name} exceeded quantity, Please try again.`,
+      //   );
+      // }
 
-      if (!selectedItem || !cartItem) {
-        throw new NotFoundException(
-          `${product.name} is not added to your cart. Please try again.`,
-        );
-      }
-
-      if (selectedItem.quantity > product.quantity) {
-        throw new BadRequestException(
-          `${product.name} exceeded quantity, Please try again.`,
-        );
-      }
-
-      if (selectedItem.quantity > cartItem.quantity) {
-        throw new BadRequestException(
-          `the quantity of ${product.name} in your cart should less than equal to your choosen quantity for this product.`,
-        );
-      }
+      // if (selectedItem.quantity > cartItem.quantity) {
+      //   throw new BadRequestException(
+      //     `the quantity of ${actualProduct.name} in your cart should less than equal to your choosen quantity for this product.`,
+      //   );
+      // }
 
       // Get total amount
-      totalAmount += product.price * selectedItem.quantity;
+      totalAmount +=
+        (actualProduct.price - actualProduct.discount) * cartItem.quantity;
 
       // Update product quantity
-      const quantityLeft = product.quantity - selectedItem.quantity;
+      const productQuantitySumIndex = productQuantityTracker.findIndex(
+        (product) => product.productId === actualProduct.id,
+      );
+      const quantityLeft =
+        productQuantityTracker[productQuantitySumIndex].quantity -
+        cartItem.quantity;
 
       if (quantityLeft >= 0) {
-        if (selectedItem.quantity === cartItem.quantity) {
-          productsTobeRemoveInCart.push(product.id);
+        if (cartItem.quantity === cartItem.quantity) {
+          productsTobeRemoveInCart.push(actualProduct.id);
         }
 
         productToBeUpdate.push({
-          ...selectedItem,
+          ...cartItem,
           finalQuantity: quantityLeft,
         });
+
+        // Update the quantity left
+        productQuantityTracker[productQuantitySumIndex].quantity = quantityLeft;
       } else {
         throw new BadRequestException(
-          `${product.name} is not enough quantity.`,
+          `${actualProduct.name} - ${cartItem.application} - ${cartItem.color} is not enough quantity.`,
         );
       }
     }
@@ -297,7 +364,7 @@ export class CartService {
     let toBeCheckOuts = [];
     for (const toBeCheckOut of checkOutInput.products) {
       const cartItem = cart.products.find(
-        (item) => item.productId === toBeCheckOut.productId,
+        (item) => item.id === toBeCheckOut.id,
       );
 
       toBeCheckOuts.push({
@@ -319,18 +386,20 @@ export class CartService {
 
     // Remove Product Item that 0 Quantity Cart
     let cartProducts = cart.products.filter(
-      (item: any) => !productsTobeRemoveInCart.includes(item.productId),
+      (item: any) => !productsTobeRemoveInCart.includes(item.id),
     );
 
-    cartProducts.forEach((item: any) => {
+    cartProducts.forEach((item: ICartItemJson) => {
       const selectedItem = checkOutInput.products.find(
-        (selected) => selected.productId === item.productId,
+        (selected) => selected.id === item.id,
       );
 
       if (selectedItem) {
         item.quantity -= selectedItem.quantity;
       }
     });
+
+    cartProducts = cartProducts.filter((item) => item.quantity > 0);
 
     return this.prismaService.cartEntity.update({
       where: {

@@ -6,6 +6,7 @@ import {
   Controller,
   Delete,
   Get,
+  Param,
   Post,
   Put,
   UseGuards,
@@ -15,6 +16,7 @@ import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { AddToCartInput } from '../dtos/inputs/add-to-cart.input';
 import { PaymentService } from '../services/payment.service';
 import { PaymentInput } from '../dtos/inputs/payment.input';
+import { RemoveCartItemsInput } from '../dtos/inputs/remove-cart-items.input';
 
 @Controller('carts')
 export class CartController {
@@ -44,6 +46,25 @@ export class CartController {
     const result = await this.cartService.addToCartItem(
       customerId,
       addToCartInput,
+    );
+
+    return {
+      data: result,
+    };
+  }
+
+  @Delete('/:cartId/delete-multiple')
+  @UseGuards(RestAuthGuard)
+  @GenericResponse()
+  async removeCartItems(
+    @CurrentUser('id') customerId: string,
+    @Body() { productCartRecordIds }: RemoveCartItemsInput,
+    @Param() params: { cartId: string },
+  ) {
+    const result = await this.cartService.removeCartItems(
+      customerId,
+      params.cartId,
+      productCartRecordIds,
     );
 
     return {

@@ -113,21 +113,7 @@ export class CustomerService {
 
     if (createCustomerInput?.password) {
       // Send Verification Email
-      await this.notificationService.sendEmail(
-        {
-          emailRecipient: savedCustomer.email,
-          emailTemplate: 'verify.template.html',
-          emailSubject: `Verify Email Account ${
-            savedCustomer.email.split('@')[0]
-          }`,
-        },
-        {
-          verifyLink: `${BASE_URL}/api/customers/verify?email=${encodeURIComponent(
-            savedCustomer.email,
-          )}`,
-          email: savedCustomer.email,
-        },
-      );
+      await this.sendVerifyAccountEmail(savedCustomer);
     }
 
     return savedCustomer;
@@ -234,5 +220,34 @@ export class CustomerService {
     );
 
     return token;
+  }
+
+  async resendVerifyAccountEmail(customerId: string) {
+    const customer = await this.prismaService.customerEntity.findFirst({
+      where: { id: customerId },
+    });
+
+    // if (customer?.isVerified) {
+    //   throw new BadRequestException('Account already verified.');
+    // }
+
+    await this.sendVerifyAccountEmail(customer);
+  }
+
+  async sendVerifyAccountEmail(customer: CustomerEntity) {
+    // Send Verification Email
+    await this.notificationService.sendEmail(
+      {
+        emailRecipient: customer.email,
+        emailTemplate: 'verify.template.html',
+        emailSubject: `Verify Email Account ${customer.email.split('@')[0]}`,
+      },
+      {
+        verifyLink: `${BASE_URL}/api/customers/verify?email=${encodeURIComponent(
+          customer.email,
+        )}`,
+        email: customer.email,
+      },
+    );
   }
 }

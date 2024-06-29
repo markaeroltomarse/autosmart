@@ -73,4 +73,9 @@ export class AdminController {
   async getSummary(): Promise<ISummaryOutputDto> {
     return this.predictiveAnalyticsService.getSummary();
   }
+
+  @Get('/reset')
+  async resetData() {
+    return this.adminService.resetData();
+  }
 }

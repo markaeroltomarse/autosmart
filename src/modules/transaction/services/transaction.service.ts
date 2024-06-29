@@ -4,7 +4,7 @@ import { BadRequestException } from '@nestjs/common/exceptions';
 import { PrismaService } from './../../prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { UpdateTransactionInput } from '../dtos/inputs/update-transaction.input';
-import { ICartProduct } from '@modules/cart/dtos/interfaces/cart-product.interface';
+import { ICheckoutCartProduct } from '@modules/cart/dtos/interfaces/cart-product.interface';
 import { CustomerService } from '@modules/customer/services/customer.service';
 
 @Injectable()
@@ -105,6 +105,10 @@ export class TransactionService {
       where: {
         serialNumber: serialNumber,
       },
+      select: {
+        id: true,
+        status: true,
+      },
     });
 
     // Check if the transaction exists and its status
@@ -147,10 +151,10 @@ export class TransactionService {
     });
   }
 
-  async getProducts(transactionProducts: ICartProduct[]) {
+  async getProducts(transactionProducts: ICheckoutCartProduct[]) {
     const products = [];
     for (let cartItem of transactionProducts) {
-      const item = cartItem as unknown as ICartProduct;
+      const item = cartItem as unknown as ICheckoutCartProduct;
       products.push({
         ...item,
         quantity: item.quantity,

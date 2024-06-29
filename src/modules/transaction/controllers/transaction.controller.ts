@@ -11,7 +11,6 @@ import {
   Param,
   Query,
 } from '@nestjs/common/decorators/http/route-params.decorator';
-import { OrderStatusEnum } from '@enums/order-status.enum';
 
 @Controller('transactions')
 export class TransactionController {

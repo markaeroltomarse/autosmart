@@ -2,6 +2,10 @@ import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class AddToCartInput {
   @IsString()
+  @IsOptional()
+  id?: string;
+
+  @IsString()
   @IsNotEmpty()
   productId: string;
 
