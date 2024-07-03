@@ -6,6 +6,7 @@ import { TransactionController } from './controllers/transaction.controller';
 import { CustomerService } from '@modules/customer/services/customer.service';
 import { JwtService } from '@nestjs/jwt';
 import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
+import { CacheService } from '@modules/cache/services/cache.service';
 
 @Module({
   controllers: [TransactionController],
@@ -16,6 +17,7 @@ import { EmailNotificationService } from '@modules/notifications/services/email-
     CustomerService,
     JwtService,
     EmailNotificationService,
+    CacheService,
   ],
 })
 export class TransactionModule {}

@@ -1,3 +1,4 @@
+import { FE_URL } from '@common/environment';
 import { PrismaService } from '@modules/prisma/services/prisma.service';
 import {
   BadRequestException,
@@ -40,9 +41,9 @@ export class PaymentService {
         currency: 'PHP',
         channel_properties: {
           mobile_number: phoneNumber,
-          cashtag: `$${parseFloat(String(amount))}`,
-          success_redirect_url: 'http://localhost:3000/cart?payment=success',
-          failure_redirect_url: 'http://localhost:3000/fail?payment=failed',
+          cashtag: `$${customerId.slice(0, 13)}`,
+          success_redirect_url: `${FE_URL}/cart?payment=success`,
+          failure_redirect_url: `${FE_URL}/fail?payment=failed`,
         },
       };
 
@@ -59,7 +60,7 @@ export class PaymentService {
 
       return createPaymentResponse.data.actions;
     } catch (error) {
-      console.log(error);
+      console.log(error.response.data);
       throw new BadRequestException('Failed to charge GCash e-wallet');
     }
   }

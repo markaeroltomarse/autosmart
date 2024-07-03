@@ -10,10 +10,11 @@ import {
   UpdateCustomerInput,
 } from '../dtos/inputs/create-customer.input';
 import { BASE_URL, JWT_SECRET } from '@common/environment';
-import { count } from 'console';
 import { excluder } from '@common/utils/object';
 import { CustomerEntity } from '@prisma/client';
 import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
+import { CacheEmailExpiration } from '@modules/cache/cache.module';
+import { CacheService } from '@modules/cache/services/cache.service';
 
 @Injectable()
 export class CustomerService {
@@ -21,6 +22,7 @@ export class CustomerService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly notificationService: EmailNotificationService,
+    private readonly cacheService: CacheService,
   ) {}
 
   async loginCustomer(email: string, password?: string) {
@@ -230,12 +232,12 @@ export class CustomerService {
     // if (customer?.isVerified) {
     //   throw new BadRequestException('Account already verified.');
     // }
-
-    await this.sendVerifyAccountEmail(customer);
+    return this.sendVerifyAccountEmail(customer);
   }
 
   async sendVerifyAccountEmail(customer: CustomerEntity) {
     // Send Verification Email
+    await this.cacheService.checkAccountVerificationEmailRequest(customer.id);
     await this.notificationService.sendEmail(
       {
         emailRecipient: customer.email,
@@ -249,5 +251,7 @@ export class CustomerService {
         email: customer.email,
       },
     );
+
+    return customer.id;
   }
 }
