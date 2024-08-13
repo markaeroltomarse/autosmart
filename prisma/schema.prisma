@@ -49,7 +49,7 @@ model ProductEntity {
   price          Float
   quantity       Int
   status         String
-  discount       Int
+  discount       Int?
   imgURL         String?  @default("")
   color          String?
   contactOptions String?
