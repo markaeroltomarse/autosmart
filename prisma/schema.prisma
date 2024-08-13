@@ -98,3 +98,10 @@ model ProductTypeEntity {
   id   String @id @default(cuid()) @map("_id")
   name String
 }
+
+model EmailSessionEntity {
+  id         String    @id @default(cuid()) @map("_id")
+  customerId String
+  expiredAt  Int
+  createdAt  DateTime? @default(now()) @map("created_at")
+}
