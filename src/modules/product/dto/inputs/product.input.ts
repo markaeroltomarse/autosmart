@@ -31,8 +31,8 @@ export class ProductInput {
   status: string;
 
   @IsInt()
-  @IsNotEmpty()
-  discount: number;
+  @IsOptional()
+  discount?: number;
 
   @IsOptional()
   @IsString()
