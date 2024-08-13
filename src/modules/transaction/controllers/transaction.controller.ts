@@ -46,10 +46,12 @@ export class TransactionController {
   async updateTransaction(
     @Param('serialNumber') serialNumber: string,
     @Body() updateTransactionInput: UpdateTransactionInput,
+    @CurrentUser('isRider') isCurrentUserIsRider: string,
   ) {
     const result = await this.transactionService.updateTransaction(
       serialNumber,
       updateTransactionInput,
+      isCurrentUserIsRider,
     );
 
     return {

@@ -100,6 +100,7 @@ export class TransactionService {
   async updateTransaction(
     serialNumber: string,
     updateTransactionInput: UpdateTransactionInput,
+    isCurrentUserIsRider?: string,
   ) {
     const transaction = await this.prismaService.transactionEntity.findFirst({
       where: {
@@ -124,15 +125,16 @@ export class TransactionService {
     }
 
     let settingDelivery: any = {};
-    if (updateTransactionInput?.email) {
+    if (updateTransactionInput?.email && !isCurrentUserIsRider) {
       const deliverBy = await this.prismaService.customerEntity.findFirst({
         where: {
           email: updateTransactionInput?.email,
+          isRider: true,
         },
       });
 
       if (!deliverBy) {
-        throw new BadRequestException('Delivery Staff not found.');
+        throw new BadRequestException('Rider not found.');
       }
 
       settingDelivery.riderId = deliverBy.id;
