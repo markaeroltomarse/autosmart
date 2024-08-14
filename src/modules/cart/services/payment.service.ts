@@ -53,14 +53,16 @@ export class PaymentService {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${btoa(`${XENDIT_API_KEY}:`)}`,
+            // Authorization: `Basic ${btoa(`${XENDIT_API_KEY}:`)}`,
+            Authorization: `Basic ${Buffer.from(`${XENDIT_API_KEY}:`, 'utf8').toString('base64')}`,
           },
         },
       );
 
       return createPaymentResponse.data.actions;
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error)
+      console.log(error.response?.data || error?.response);
       throw new BadRequestException('Failed to charge GCash e-wallet');
     }
   }

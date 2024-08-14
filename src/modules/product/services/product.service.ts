@@ -5,6 +5,7 @@ import { ProductInput } from '../dto/inputs/product.input';
 import { ProductEntity } from '@prisma/client';
 import { UpdateProductInput } from '../dto/inputs/update-product.input';
 import { CreateCategoryInput } from '../dto/inputs/category/category.input';
+import { OrderStatusEnum } from '@enums/order-status.enum';
 
 @Injectable()
 export class ProductService {
@@ -87,6 +88,28 @@ export class ProductService {
   }
 
   async deleteProduct(productId: string) {
+    const pendingOrShippedOrders = await this.prismaService.transactionEntity.findMany({
+      where: {
+       OR:[
+        {status: OrderStatusEnum.PENDING},
+        {status: OrderStatusEnum.SHIPPED}
+       ]
+      }
+    })
+
+    let somePending = false
+    pendingOrShippedOrders.forEach((order) => {
+      if (order.products.find((product: any) => product.productId === productId )) {
+        somePending = true
+      }
+    })
+
+    if (somePending) {
+      throw new BadRequestException(
+        'Cannot delete product have pending orders. Please try again.',
+      );
+    }
+
     return this.prismaService.productEntity
       .delete({
         where: { id: productId },

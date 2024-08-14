@@ -13,8 +13,7 @@ import { BASE_URL, JWT_SECRET } from '@common/environment';
 import { excluder } from '@common/utils/object';
 import { CustomerEntity } from '@prisma/client';
 import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
-import { CacheEmailExpiration } from '@modules/cache/cache.module';
-import { CacheService } from '@modules/cache/services/cache.service';
+// import { CacheService } from '@modules/cache/services/cache.service';
 
 @Injectable()
 export class CustomerService {
@@ -22,7 +21,7 @@ export class CustomerService {
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
     private readonly notificationService: EmailNotificationService,
-    private readonly cacheService: CacheService,
+    // private readonly cacheService: CacheService,
   ) {}
 
   async loginCustomer(email: string, password?: string) {
@@ -237,7 +236,7 @@ export class CustomerService {
 
   async sendVerifyAccountEmail(customer: CustomerEntity) {
     // Send Verification Email
-    await this.cacheService.checkAccountVerificationEmailRequest(customer.id);
+    // await this.cacheService.checkAccountVerificationEmailRequest(customer.id);
     await this.notificationService.sendEmail(
       {
         emailRecipient: customer.email,

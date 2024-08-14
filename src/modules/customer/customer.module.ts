@@ -5,7 +5,7 @@ import { PrismaService } from './../prisma/services/prisma.service';
 import { CustomerService } from './services/customer.service';
 import { Module } from '@nestjs/common';
 import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
-import { CacheService } from '@modules/cache/services/cache.service';
+// import { CacheService } from '@modules/cache/services/cache.service';
 
 @Module({
   controllers: [CustomerController],
@@ -14,7 +14,7 @@ import { CacheService } from '@modules/cache/services/cache.service';
     CustomerService,
     PrismaService,
     EmailNotificationService,
-    CacheService,
+    // CacheService,
   ],
   exports: [CustomerService],
 })

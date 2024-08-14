@@ -13,7 +13,6 @@ import { TransactionModule } from './transaction/transaction.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { I18nJsonParser, I18nModule } from 'nestjs-i18n';
 import { join } from 'path';
-import { CacheableModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -41,7 +40,7 @@ import { CacheableModule } from './cache/cache.module';
     CartModule,
     TransactionModule,
     NotificationsModule,
-    CacheableModule,
+    // CacheableModule,
   ],
   controllers: [],
   providers: [JwtStrategy],
