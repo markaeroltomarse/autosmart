@@ -267,7 +267,6 @@ export class CustomerService {
       where: { id: customerId },
     });
 
-   
     return this.sendVerifyAccountEmail(customer);
   }
 
@@ -288,4 +287,7 @@ export class CustomerService {
 
     return customer.id;
   }
+
+  //THIS IS COMMIT 1
+  //THIS IS COMMIT 2
 }
