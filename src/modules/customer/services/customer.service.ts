@@ -288,6 +288,6 @@ export class CustomerService {
     return customer.id;
   }
 
-  //THIS IS COMMIT 1
+  //THIS IS COMMIT 1 FINAL
   //THIS IS COMMIT 2
 }
