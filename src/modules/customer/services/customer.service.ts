@@ -288,6 +288,5 @@ export class CustomerService {
     return customer.id;
   }
 
-  //THIS IS COMMIT 1 FINAL
-  //THIS IS COMMIT 2 FINAL
+  // REMOVE COMMENTS
 }
