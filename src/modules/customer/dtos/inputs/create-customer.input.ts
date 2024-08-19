@@ -52,6 +52,10 @@ export class CreateCustomerInput {
   @IsNotEmpty()
   @IsBoolean()
   isVerified?: boolean;
+
+  @IsOptional()
+  @IsNotEmpty()
+  role?: string;
 }
 
 // export class UpdateCustomerInput extends PartialType(

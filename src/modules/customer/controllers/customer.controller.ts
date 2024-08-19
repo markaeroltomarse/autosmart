@@ -16,10 +16,12 @@ import {
   Query,
   Res,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
 import { Response } from 'express';
 import { FE_URL } from '@common/environment';
+import { ICustomersFilter } from '../dtos/inputs/customers-filter-input.dto';
 
 @Controller('customers')
 export class CustomerController {
@@ -49,6 +51,15 @@ export class CustomerController {
 
     return {
       data: CustomerMapper.displayOne(result),
+    };
+  }
+
+  @Get('/all')
+  async getCustomers(@Query() filter?: ICustomersFilter) {
+    const result = await this.customerService.getCustomers(filter);
+
+    return {
+      data: CustomerMapper.displayAll(result),
     };
   }
 

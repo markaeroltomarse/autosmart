@@ -27,6 +27,8 @@ model CustomerEntity {
   isRider    Boolean @default(false)
   isVerified Boolean @default(false)
 
+  role String? @default("customer")
+
   @@map("customers")
 }
 
