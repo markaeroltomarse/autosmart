@@ -14,14 +14,16 @@ import { excluder } from '@common/utils/object';
 import { CustomerEntity } from '@prisma/client';
 import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
 // import { CacheService } from '@modules/cache/services/cache.service';
+import { filterDefaultValue } from 'src/data/dto/filter-input.dto';
+import { ICustomersFilter } from '../dtos/inputs/customers-filter-input.dto';
+import { setObjectDefaultValue } from 'src/utils/object.util';
 
 @Injectable()
 export class CustomerService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-    private readonly notificationService: EmailNotificationService,
-    // private readonly cacheService: CacheService,
+    private readonly notificationService: EmailNotificationService, // private readonly cacheService: CacheService,
   ) {}
 
   async loginCustomer(email: string, password?: string) {
@@ -170,6 +172,43 @@ export class CustomerService {
           'Cannot update profile, Please try again.',
         );
       });
+  }
+
+  async getCustomers(f: ICustomersFilter) {
+    const { search, page, pageItem, role } = setObjectDefaultValue(
+      f,
+      filterDefaultValue,
+    );
+
+    const customers = await this.prismaService.customerEntity.findMany({
+      where: {
+        OR: [
+          {
+            fname: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            lname: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            email: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+        ],
+        role: role,
+      },
+      skip: (page - 1) * pageItem,
+      take: pageItem,
+    });
+
+    return customers;
   }
 
   async getCustomer(customerId: string, isRider?: boolean) {
