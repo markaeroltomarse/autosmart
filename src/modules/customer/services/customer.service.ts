@@ -267,15 +267,11 @@ export class CustomerService {
       where: { id: customerId },
     });
 
-    // if (customer?.isVerified) {
-    //   throw new BadRequestException('Account already verified.');
-    // }
+   
     return this.sendVerifyAccountEmail(customer);
   }
 
   async sendVerifyAccountEmail(customer: CustomerEntity) {
-    // Send Verification Email
-    // await this.cacheService.checkAccountVerificationEmailRequest(customer.id);
     await this.notificationService.sendEmail(
       {
         emailRecipient: customer.email,
