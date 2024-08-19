@@ -11,7 +11,6 @@ import {
   Param,
   Query,
 } from '@nestjs/common/decorators/http/route-params.decorator';
-import { OrderStatusEnum } from '@enums/order-status.enum';
 
 @Controller('transactions')
 export class TransactionController {
@@ -47,10 +46,12 @@ export class TransactionController {
   async updateTransaction(
     @Param('serialNumber') serialNumber: string,
     @Body() updateTransactionInput: UpdateTransactionInput,
+    @CurrentUser('isRider') isCurrentUserIsRider: string,
   ) {
     const result = await this.transactionService.updateTransaction(
       serialNumber,
       updateTransactionInput,
+      isCurrentUserIsRider,
     );
 
     return {

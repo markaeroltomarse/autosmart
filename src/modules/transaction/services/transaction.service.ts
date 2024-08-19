@@ -4,7 +4,7 @@ import { BadRequestException } from '@nestjs/common/exceptions';
 import { PrismaService } from './../../prisma/services/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { UpdateTransactionInput } from '../dtos/inputs/update-transaction.input';
-import { ICartProduct } from '@modules/cart/dtos/interfaces/cart-product.interface';
+import { ICheckoutCartProduct } from '@modules/cart/dtos/interfaces/cart-product.interface';
 import { CustomerService } from '@modules/customer/services/customer.service';
 
 @Injectable()
@@ -79,6 +79,15 @@ export class TransactionService {
       const customer = await this.customerService.getCustomer(
         transactions[index].customerId,
       );
+
+      if (transaction?.riderId) {
+        const rider = await this.customerService.getCustomer(
+          transaction.riderId,
+          true,
+        );
+
+        transactions[index].rider = rider;
+      }
       transactions[index].address = customer.defaultAddress;
       transactions[index].contactNumber = customer.contactNumber;
       transactions[index].fullname = customer.lname + ', ' + customer.fname;
@@ -91,17 +100,24 @@ export class TransactionService {
   async updateTransaction(
     serialNumber: string,
     updateTransactionInput: UpdateTransactionInput,
+    isCurrentUserIsRider?: string,
   ) {
     const transaction = await this.prismaService.transactionEntity.findFirst({
       where: {
         serialNumber: serialNumber,
       },
+      select: {
+        id: true,
+        status: true,
+      },
     });
 
+    // Check if the transaction exists and its status
     if (
       !transaction ||
-      transaction.status === OrderStatusEnum.COMPLETED ||
-      transaction.status === OrderStatusEnum.CANCELLED
+      [OrderStatusEnum.COMPLETED, OrderStatusEnum.CANCELLED].includes(
+        transaction.status as any,
+      )
     ) {
       throw new BadRequestException(
         'Cannot update order status, please try again.',
@@ -109,15 +125,16 @@ export class TransactionService {
     }
 
     let settingDelivery: any = {};
-    if (updateTransactionInput?.email) {
+    if (updateTransactionInput?.email && !isCurrentUserIsRider) {
       const deliverBy = await this.prismaService.customerEntity.findFirst({
         where: {
           email: updateTransactionInput?.email,
+          isRider: true,
         },
       });
 
       if (!deliverBy) {
-        throw new BadRequestException('Delivery Staff not found.');
+        throw new BadRequestException('Rider not found.');
       }
 
       settingDelivery.riderId = deliverBy.id;
@@ -136,10 +153,10 @@ export class TransactionService {
     });
   }
 
-  async getProducts(transactionProducts: ICartProduct[]) {
+  async getProducts(transactionProducts: ICheckoutCartProduct[]) {
     const products = [];
     for (let cartItem of transactionProducts) {
-      const item = cartItem as unknown as ICartProduct;
+      const item = cartItem as unknown as ICheckoutCartProduct;
       products.push({
         ...item,
         quantity: item.quantity,

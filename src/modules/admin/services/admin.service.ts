@@ -84,4 +84,15 @@ export class AdminService {
       token,
     };
   }
+
+  async resetData() {
+    return this.prismaService.$transaction([
+      this.prismaService.cartEntity.updateMany({
+        data: {
+          products: [],
+        },
+      }),
+      this.prismaService.transactionEntity.deleteMany(),
+    ]);
+  }
 }

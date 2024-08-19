@@ -1,0 +1,18 @@
+{
+    "NOT_FOUND": {
+        "message": "User not found.",
+        "errorCode": "PFU00001"
+    },
+    "EMAIL_EXIST": {
+        "message": "Username is not available, Please try again!",
+        "errorCode": "U0001"
+    },
+    "NOT_VERIFIED": {
+        "message": "Please verify your account frist!",
+        "errorCode": "U0002"
+    },
+    "INVALID_LOGIN": {
+        "message": "Invalid credentials. Please try again.",
+        "errorCode": "U0003"
+    }
+}

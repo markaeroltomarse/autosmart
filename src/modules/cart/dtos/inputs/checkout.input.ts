@@ -7,13 +7,13 @@ import {
   IsInt,
   IsPositive,
 } from 'class-validator';
-import { ICartProduct } from './../interfaces/cart-product.interface';
+import { ICheckoutCartProduct } from './../interfaces/cart-product.interface';
 export class CheckOutInput {
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => CartProduct)
-  products: ICartProduct[];
+  products: ICheckoutCartProduct[];
 
   @IsNotEmpty()
   @IsString()

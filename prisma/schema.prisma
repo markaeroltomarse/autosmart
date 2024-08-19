@@ -24,7 +24,10 @@ model CustomerEntity {
   cart              CartEntity?
   TransactionEntity TransactionEntity[]
 
-  isRider Boolean @default(false)
+  isRider    Boolean @default(false)
+  isVerified Boolean @default(false)
+
+  role String? @default("customer")
 
   @@map("customers")
 }
@@ -48,7 +51,7 @@ model ProductEntity {
   price          Float
   quantity       Int
   status         String
-  discount       Int
+  discount       Int?
   imgURL         String?  @default("")
   color          String?
   contactOptions String?
@@ -96,4 +99,11 @@ model CategoryEntity {
 model ProductTypeEntity {
   id   String @id @default(cuid()) @map("_id")
   name String
+}
+
+model EmailSessionEntity {
+  id         String    @id @default(cuid()) @map("_id")
+  customerId String
+  expiredAt  Int
+  createdAt  DateTime? @default(now()) @map("created_at")
 }
