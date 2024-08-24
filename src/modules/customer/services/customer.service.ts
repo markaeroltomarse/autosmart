@@ -287,10 +287,7 @@ export class CustomerService {
 
     return customer.id;
   }
-<<<<<<< Updated upstream
 
   // REMOVE COMMENTS
   // ADD COMMENTS
-=======
->>>>>>> Stashed changes
 }
