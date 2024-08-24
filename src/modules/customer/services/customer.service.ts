@@ -147,7 +147,7 @@ export class CustomerService {
       );
     }
 
-    let where: any = {};
+    const where: any = {};
     if (updateCustomerInput?.['email']) {
       const user = await this.prismaService.customerEntity.findFirst({
         where: { email: updateCustomerInput['email'] },
@@ -233,7 +233,7 @@ export class CustomerService {
     });
 
     const outputRiders: any[] = [];
-    for (let rider of riders) {
+    for (const rider of riders) {
       const count = await this.prismaService.transactionEntity.count({
         where: {
           riderId: rider.id,
@@ -247,49 +247,6 @@ export class CustomerService {
 
     return outputRiders;
   }
-
-  async generateToken(user) {
-    const token = this.jwtService.sign(
-      {
-        id: user.id,
-        role: user.role,
-      },
-      {
-        secret: JWT_SECRET,
-      },
-    );
-
-    return token;
-  }
-
-  async resendVerifyAccountEmail(customerId: string) {
-    const customer = await this.prismaService.customerEntity.findFirst({
-      where: { id: customerId },
-    });
-
-    return this.sendVerifyAccountEmail(customer);
-  }
-
-  async sendVerifyAccountEmail(customer: CustomerEntity) {
-    await this.notificationService.sendEmail(
-      {
-        emailRecipient: customer.email,
-        emailTemplate: 'verify.template.html',
-        emailSubject: `Verify Email Account ${customer.email.split('@')[0]}`,
-      },
-      {
-        verifyLink: `${BASE_URL}/api/customers/verify?email=${encodeURIComponent(
-          customer.email,
-        )}`,
-        email: customer.email,
-      },
-    );
-
-    return customer.id;
-  }
-
-  //THIS IS COMMIT 1 FINAL
-  //THIS IS COMMIT 2 FINAL
 
   async generateToken(user) {
     const token = this.jwtService.sign(
