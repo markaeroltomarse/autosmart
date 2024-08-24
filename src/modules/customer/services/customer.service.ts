@@ -147,7 +147,7 @@ export class CustomerService {
       );
     }
 
-    let where: any = {};
+    const where: any = {};
     if (updateCustomerInput?.['email']) {
       const user = await this.prismaService.customerEntity.findFirst({
         where: { email: updateCustomerInput['email'] },
@@ -233,7 +233,7 @@ export class CustomerService {
     });
 
     const outputRiders: any[] = [];
-    for (let rider of riders) {
+    for (const rider of riders) {
       const count = await this.prismaService.transactionEntity.count({
         where: {
           riderId: rider.id,
@@ -287,7 +287,10 @@ export class CustomerService {
 
     return customer.id;
   }
+<<<<<<< Updated upstream
 
   // REMOVE COMMENTS
   // ADD COMMENTS
+=======
+>>>>>>> Stashed changes
 }
