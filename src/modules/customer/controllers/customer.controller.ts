@@ -16,6 +16,7 @@ import {
   Query,
   Res,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
 import { Response } from 'express';
