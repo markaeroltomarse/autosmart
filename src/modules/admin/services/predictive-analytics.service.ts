@@ -1,8 +1,8 @@
-import { ITransactionProductsJson } from '../../../data/types/transaction.types';
 import { PrismaService } from '@modules/prisma/services/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { TransactionEntity } from '@prisma/client';
 import * as ss from 'simple-statistics';
+import { ITransactionProductsJson } from '../../../data/types/transaction.types';
 import { ISummaryOutputDto } from '../dto/output/dashboard';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class PredictiveAnalyticsService {
 
     // Check if there is enough data for prediction
     if (salesData.length < 2) {
-      throw new Error('Not enough data for prediction');
+      throw new BadRequestException('Not enough data for prediction');
     }
 
     // Prepare the data for linear regression

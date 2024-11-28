@@ -1,10 +1,9 @@
-import { PrismaService } from './../../../modules/prisma/services/prisma.service';
 import { JWT_SECRET } from '@common/environment';
-import { AdminService } from '@modules/admin/services/admin.service';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtPayload } from '../interface/jwt-payload.interface';
+import { PrismaService } from './../../../modules/prisma/services/prisma.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -27,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       });
 
-      const user = admin || customer;
+      const user = admin ? { ...admin, role: 'admin' } : customer;
 
       if (!user) throw new UnauthorizedException();
 

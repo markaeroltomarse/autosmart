@@ -1,11 +1,6 @@
-import {
-  CreateCustomerInput,
-  UpdateCustomerInput,
-} from './../dtos/inputs/create-customer.input';
-import { CustomerMapper } from './../dtos/mappers/customer.mapper';
-import { CurrentUser } from './../../../common/decorators/current-user.decorator';
-import { RestAuthGuard } from './../../../common/auth/guards/rest-auth.guard';
-import { CustomerService } from './../services/customer.service';
+import { GenericResponse } from '@common/decorators/generic-response.decorator';
+import { FE_URL } from '@common/environment';
+import { EmployeeEnum } from '@enums/role.enum';
 import {
   Body,
   Controller,
@@ -16,12 +11,16 @@ import {
   Query,
   Res,
   UseGuards,
-  ValidationPipe,
 } from '@nestjs/common';
-import { GenericResponse } from '@common/decorators/generic-response.decorator';
 import { Response } from 'express';
-import { FE_URL } from '@common/environment';
-import { ICustomersFilter } from '../dtos/inputs/customers-filter-input.dto';
+import { RestAuthGuard } from './../../../common/auth/guards/rest-auth.guard';
+import { CurrentUser } from './../../../common/decorators/current-user.decorator';
+import {
+  CreateCustomerInput,
+  UpdateCustomerInput,
+} from './../dtos/inputs/create-customer.input';
+import { CustomerMapper } from './../dtos/mappers/customer.mapper';
+import { CustomerService } from './../services/customer.service';
 
 @Controller('customers')
 export class CustomerController {
@@ -46,20 +45,16 @@ export class CustomerController {
   @Get()
   @UseGuards(RestAuthGuard)
   @GenericResponse()
-  async getCustomer(@CurrentUser('id') customerId: string) {
-    const result = await this.customerService.getCustomer(customerId);
+  async getCustomer(@CurrentUser() user: any) {
+    if (user.role === EmployeeEnum.ADMIN) {
+      return {
+        data: CustomerMapper.displayOne(user),
+      };
+    }
 
+    const result = await this.customerService.getCustomer(user?.id);
     return {
       data: CustomerMapper.displayOne(result),
-    };
-  }
-
-  @Get('/all')
-  async getCustomers(@Query() filter?: ICustomersFilter) {
-    const result = await this.customerService.getCustomers(filter);
-
-    return {
-      data: CustomerMapper.displayAll(result),
     };
   }
 

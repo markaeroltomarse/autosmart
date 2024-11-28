@@ -1,14 +1,14 @@
-import { RestAuthGuard } from './../../../common/auth/guards/rest-auth.guard';
-import { AdminLoginInput } from './../dto/input/login-admin.input';
-import { AdminMapper } from './../dto/mapper/admin.mapper';
-import { AdminService } from '@modules/admin/services/admin.service';
+import { CurrentUser } from '@common/decorators/current-user.decorator';
 import { GenericResponse } from '@common/decorators/generic-response.decorator';
+import { AdminService } from '@modules/admin/services/admin.service';
 import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { Body } from '@nestjs/common/decorators';
 import { CreateAdminInput } from '../dto/input/create-admin.input';
-import { CurrentUser } from '@common/decorators/current-user.decorator';
-import { PredictiveAnalyticsService } from '../services/predictive-analytics.service';
 import { ISummaryOutputDto } from '../dto/output/dashboard';
+import { PredictiveAnalyticsService } from '../services/predictive-analytics.service';
+import { RestAuthGuard } from './../../../common/auth/guards/rest-auth.guard';
+import { AdminLoginInput } from './../dto/input/login-admin.input';
+import { AdminMapper } from './../dto/mapper/admin.mapper';
 
 @Controller('admin')
 export class AdminController {
@@ -30,7 +30,7 @@ export class AdminController {
 
   // Create Admin
   @Post()
-  @UseGuards(RestAuthGuard)
+  // @UseGuards(RestAuthGuard)
   @GenericResponse()
   async createAdmin(@Body() adminInput: CreateAdminInput) {
     const result = await this.adminService.createAdmin(adminInput);
@@ -39,7 +39,6 @@ export class AdminController {
     };
   }
 
-  // Create Admin
   @Post('login')
   @GenericResponse()
   async loginAdmin(@Body() loginInput: AdminLoginInput) {
@@ -53,6 +52,7 @@ export class AdminController {
   }
 
   @Get('/sales-prediction')
+  // @UseGuards(AdminAuthGuard)
   @GenericResponse()
   async dashboard() {
     const result = await this.predictiveAnalyticsService.getSalesPrediction();

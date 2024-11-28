@@ -1,13 +1,13 @@
-import { GenderEnum } from './../../../../data/enums/gender.enum';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import {
-  IsNotEmpty,
-  IsEmail,
-  IsOptional,
-  IsEnum,
   IsArray,
   IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
 } from 'class-validator';
-import { OmitType, PartialType } from '@nestjs/mapped-types';
+import { GenderEnum } from './../../../../data/enums/gender.enum';
 export class CreateCustomerInput {
   @IsNotEmpty()
   @IsEmail()
@@ -70,4 +70,21 @@ export class UpdateCustomerInput extends PartialType(
   @IsOptional()
   @IsEmail()
   email?: string;
+}
+
+export class UpdateEmployeeInput extends PartialType(
+  OmitType(CreateCustomerInput, ['email'] as const),
+) {
+  @IsOptional()
+  @IsNotEmpty()
+  fname?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  lname?: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(GenderEnum)
+  gender?: GenderEnum;
 }

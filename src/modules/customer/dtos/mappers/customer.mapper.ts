@@ -2,7 +2,7 @@ import { CustomerEntity } from '@prisma/client';
 import { ICustomerOutput } from '../outputs/customer.output';
 
 export class CustomerMapper {
-  static displayOne(customer: CustomerEntity) {
+  static displayOne(customer: CustomerEntity | any) {
     if (!customer) return null;
     delete customer['password'];
 

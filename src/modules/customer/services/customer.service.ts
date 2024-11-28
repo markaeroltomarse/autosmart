@@ -1,22 +1,19 @@
-import { JwtService } from '@nestjs/jwt';
-import {
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common/exceptions';
-import { PrismaService } from './../../prisma/services/prisma.service';
+import { BASE_URL, JWT_SECRET } from '@common/environment';
+import { GeneratorProvider } from '@common/providers/generator.provider';
+import { excluder } from '@common/utils/object';
+import { EmployeeEnum } from '@enums/role.enum';
+import { AdminLoginInput } from '@modules/admin/dto/input/login-admin.input';
+import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
 import { Injectable } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common/exceptions';
+import { JwtService } from '@nestjs/jwt';
+import { CustomerEntity } from '@prisma/client';
 import {
   CreateCustomerInput,
   UpdateCustomerInput,
 } from '../dtos/inputs/create-customer.input';
-import { BASE_URL, JWT_SECRET } from '@common/environment';
-import { excluder } from '@common/utils/object';
-import { CustomerEntity } from '@prisma/client';
-import { EmailNotificationService } from '@modules/notifications/services/email-notification.service';
+import { PrismaService } from './../../prisma/services/prisma.service';
 // import { CacheService } from '@modules/cache/services/cache.service';
-import { filterDefaultValue } from 'src/data/dto/filter-input.dto';
-import { ICustomersFilter } from '../dtos/inputs/customers-filter-input.dto';
-import { setObjectDefaultValue } from 'src/utils/object.util';
 
 @Injectable()
 export class CustomerService {
@@ -26,9 +23,41 @@ export class CustomerService {
     private readonly notificationService: EmailNotificationService, // private readonly cacheService: CacheService,
   ) {}
 
+  async loginAdmin(loginInput: AdminLoginInput, isThrow: boolean = true) {
+    const admin = await this.prismaService.adminEntity.findFirst({
+      where: {
+        email: loginInput.email,
+      },
+    });
+
+    if (
+      !admin ||
+      !GeneratorProvider.validateHash(loginInput.password, admin.password) //  Decrypt password and check if match
+    ) {
+      if (isThrow) {
+        throw new BadRequestException('Invalid credentials. Please try again.');
+      }
+    }
+
+    // Create a token that will handle in Front End. for security
+    const token = admin
+      ? this.jwtService.sign(
+          { id: admin.id },
+          {
+            secret: JWT_SECRET,
+          },
+        )
+      : '';
+
+    return {
+      admin,
+      token,
+    };
+  }
+
   async loginCustomer(email: string, password?: string) {
     // If login is by Email and Password
-    const where: any = { email };
+    let where: any = { email };
     if (password) {
       where.password = password;
     }
@@ -43,7 +72,18 @@ export class CustomerService {
       });
 
     if (!email || !customer) {
-      throw new NotFoundException('Invalid credentials');
+      const admin = await this.loginAdmin({
+        email: email,
+        password,
+      });
+
+      return {
+        customer: {
+          ...admin.admin,
+          role: EmployeeEnum.ADMIN,
+        },
+        token: admin.token,
+      };
     }
 
     // Create a token that will handle in Front End. for security
@@ -174,45 +214,8 @@ export class CustomerService {
       });
   }
 
-  async getCustomers(f: ICustomersFilter) {
-    const { search, page, pageItem, role } = setObjectDefaultValue(
-      f,
-      filterDefaultValue,
-    );
-
-    const customers = await this.prismaService.customerEntity.findMany({
-      where: {
-        OR: [
-          {
-            fname: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            lname: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            email: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-        ],
-        role: role,
-      },
-      skip: (page - 1) * pageItem,
-      take: pageItem,
-    });
-
-    return customers;
-  }
-
   async getCustomer(customerId: string, isRider?: boolean) {
-    return this.prismaService.customerEntity
+    const customer = await this.prismaService.customerEntity
       .findFirst({
         where: {
           id: customerId,
@@ -223,6 +226,8 @@ export class CustomerService {
         console.log(error);
         throw new BadRequestException('Cannot get profile, Please try again.');
       });
+
+    return customer;
   }
 
   async getRiders(): Promise<CustomerEntity[]> {
@@ -287,7 +292,4 @@ export class CustomerService {
 
     return customer.id;
   }
-
-  // REMOVE COMMENTS
-  // ADD COMMENTS
 }
