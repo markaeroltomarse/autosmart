@@ -135,6 +135,7 @@ export class CustomerService {
         data: {
           ...createCustomerInput,
           password: createCustomerInput?.password || 'autosmart2023',
+          // isVerified: !createCustomerInput?.password,
         },
       })
       .catch((error) => {
@@ -159,7 +160,17 @@ export class CustomerService {
       await this.sendVerifyAccountEmail(savedCustomer);
     }
 
-    return savedCustomer;
+    const token = this.jwtService.sign(
+      { id: savedCustomer.id },
+      {
+        secret: JWT_SECRET,
+      },
+    );
+
+    return {
+      customer: savedCustomer,
+      token: !createCustomerInput?.password ? token : '',
+    };
   }
 
   async updateCustomer(

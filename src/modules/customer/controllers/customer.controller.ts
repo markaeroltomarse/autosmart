@@ -66,7 +66,10 @@ export class CustomerController {
     );
 
     return {
-      data: CustomerMapper.displayOne(result),
+      data: {
+        customer: CustomerMapper.displayOne(result.customer),
+        token: result.token,
+      },
     };
   }
 
